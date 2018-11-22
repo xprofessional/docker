@@ -2,6 +2,7 @@
 ## Dockerfile: UBUNTU Base
 ##  Python, Pip, Selenium, Google-Chrome, Chromedriver
 ## https://hub.docker.com/r/dorowu/ubuntu-desktop-lxde-vnc/~/dockerfile/
+## https://github.com/eclipse/che-dockerfiles/tree/master/recipes
 ## https://github.com/eclipse/che-dockerfiles/tree/master/recipes/stack-base/ubuntu
 ##############################################################################
 
