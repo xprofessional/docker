@@ -29,7 +29,7 @@ RUN sudo apt-get install -y --no-install-recommends --allow-unauthenticated \
         vim-tiny git p7zip unzip google-chrome-stable firefox
 
 ##### INSTALL PYTHON #####
-RUN sudo apt-ger install -y --no-install-recommends --allow-unauthenticated python python-pip python-dev build-essential
+RUN sudo apt-get install -y --no-install-recommends --allow-unauthenticated python python-pip python-dev build-essential
 RUN sudo pip install --upgrade pip
 RUN sudo pip install --upgrade setuptools \
     && sudo pip install --no-cache-dir virtualenv
