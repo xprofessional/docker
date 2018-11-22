@@ -10,24 +10,25 @@
 ################################################################################
 #FROM ubuntu:18.04 as system
 #FROM ubuntu:16.04 as system
-FROM eclipse/che
+#FROM eclipse/che
+FROM eclipse/ubuntu_python
 
 ##### BUILT-IN PKGS #####
-RUN apt update \
-    &&  apt install -y --no-install-recommends --allow-unauthenticated curl wget apt-utils software-properties-common sudo
+#RUN sudo apt-get update \
+#    &&  sudo apt-get install -y --no-install-recommends --allow-unauthenticated curl wget apt-utils software-properties-common sudo
 
 ##### ADD CUSTOM KEYS & REPOS #####
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add - \
-    && rm -f /etc/apt/sources.list.d/google.list \
+    && sudo rm -f /etc/apt/sources.list.d/google.list \
     && sudo echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list \
-    && sudo apt update
+    && sudo apt-get update
 
 ##### INSTALL PACKAGES #####
-RUN sudo apt install -y --no-install-recommends --allow-unauthenticated \
+RUN sudo apt-get install -y --no-install-recommends --allow-unauthenticated \
         vim-tiny git p7zip unzip google-chrome-stable firefox
 
 ##### INSTALL PYTHON #####
-RUN sudo apt install -y --no-install-recommends --allow-unauthenticated python python-pip python-dev build-essential
+RUN sudo apt-ger install -y --no-install-recommends --allow-unauthenticated python python-pip python-dev build-essential
 RUN sudo pip install --upgrade pip
 RUN sudo pip install --upgrade setuptools \
     && sudo pip install --no-cache-dir virtualenv
@@ -44,7 +45,7 @@ RUN CD_VERSION=$(if [ ${CHROME_DRIVER_VERSION:-latest} = "latest" ]; then echo $
   && sudo ln -fs /opt/selenium/chromedriver-$CD_VERSION /usr/bin/chromedriver
 
 ##### UPGRADE #####
-RUN sudo apt upgrade -y --no-install-recommends --allow-unauthenticated
+RUN sudo apt-get upgrade -y --no-install-recommends --allow-unauthenticated
 
 ##### CLEANUP #####
 RUN sudo apt autoremove -y \
