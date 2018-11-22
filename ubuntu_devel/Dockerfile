@@ -55,6 +55,13 @@ RUN apt autoremove -y \
 ##### CONFIGURE THE FILESYSTEM
 RUN mkdir /projects && chmod 777 /projects
 
+##### CONFIGURE OpenShift CHE
+# ls -la  # to check if there's a bootstrapper binary
+ARG CHE_URL="https://che.openshift.io"
+RUN mkdir /tmp/bootstrapper \
+    && cd /tmp/bootstrapper \
+    && curl ${CHE_URL}/agent-binaries/linux_amd64/bootstrapper/bootstrapper
+
 ################################################################################
 #
 ################################################################################
