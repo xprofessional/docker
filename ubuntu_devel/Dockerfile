@@ -17,41 +17,41 @@ RUN sudo apt update \
     && sudo apt install -y --no-install-recommends --allow-unauthenticated curl wget apt-utils software-properties-common
 
 ##### ADD CUSTOM KEYS & REPOS #####
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add - \
     && rm -f /etc/apt/sources.list.d/google.list \
-    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list \
-    && apt update
+    && sudo echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list \
+    && sudo apt update
 
 ##### INSTALL PACKAGES #####
-RUN apt install -y --no-install-recommends --allow-unauthenticated \
-        sudo vim-tiny git p7zip unzip google-chrome-stable firefox
+RUN sudo apt install -y --no-install-recommends --allow-unauthenticated \
+        vim-tiny git p7zip unzip google-chrome-stable firefox
 
 ##### INSTALL PYTHON #####
-RUN apt install -y --no-install-recommends --allow-unauthenticated python python-pip python-dev build-essential
-RUN pip install --upgrade pip
-RUN pip install --upgrade setuptools \
-    && pip install --no-cache-dir virtualenv
+RUN sudo apt install -y --no-install-recommends --allow-unauthenticated python python-pip python-dev build-essential
+RUN sudo pip install --upgrade pip
+RUN sudo pip install --upgrade setuptools \
+    && sudo pip install --no-cache-dir virtualenv
 
 ARG CHROME_DRIVER_VERSION="latest"
 RUN CD_VERSION=$(if [ ${CHROME_DRIVER_VERSION:-latest} = "latest" ]; then echo $(wget -qO- https://chromedriver.storage.googleapis.com/LATEST_RELEASE); else echo $CHROME_DRIVER_VERSION; fi) \
   && echo "Using chromedriver version: "$CD_VERSION \
   && wget --no-verbose -O /tmp/chromedriver_linux64.zip https://chromedriver.storage.googleapis.com/$CD_VERSION/chromedriver_linux64.zip \
-  && rm -rf /opt/selenium/chromedriver \
-  && unzip /tmp/chromedriver_linux64.zip -d /opt/selenium \
+  && sudo rm -rf /opt/selenium/chromedriver \
+  && sudo unzip /tmp/chromedriver_linux64.zip -d /opt/selenium \
   && rm /tmp/chromedriver_linux64.zip \
-  && mv /opt/selenium/chromedriver /opt/selenium/chromedriver-$CD_VERSION \
-  && chmod 755 /opt/selenium/chromedriver-$CD_VERSION \
-  && ln -fs /opt/selenium/chromedriver-$CD_VERSION /usr/bin/chromedriver
+  && sudo mv /opt/selenium/chromedriver /opt/selenium/chromedriver-$CD_VERSION \
+  && sudo chmod 755 /opt/selenium/chromedriver-$CD_VERSION \
+  && sudo ln -fs /opt/selenium/chromedriver-$CD_VERSION /usr/bin/chromedriver
 
 ##### UPGRADE #####
-RUN apt upgrade -y --no-install-recommends --allow-unauthenticated
+RUN sudo apt upgrade -y --no-install-recommends --allow-unauthenticated
 
 ##### CLEANUP #####
-RUN apt autoremove -y \
-    && apt autoclean -y \
-    && apt purge $(dpkg -l linux-{image,headers}-"[0-9]*" | awk '/ii/{print $2}' | grep -ve "$(uname -r | sed -r 's/-[a-z]+//')") \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /var/cache/apt/*
+RUN sudo apt autoremove -y \
+    && sudo apt autoclean -y \
+    && sudo apt purge $(dpkg -l linux-{image,headers}-"[0-9]*" | awk '/ii/{print $2}' | grep -ve "$(uname -r | sed -r 's/-[a-z]+//')") \
+    && sudo rm -rf /var/lib/apt/lists/* \
+    && sudo rm -rf /var/cache/apt/*
 
 ################################################################################
 #
