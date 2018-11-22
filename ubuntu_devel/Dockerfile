@@ -13,8 +13,8 @@
 FROM eclipse/che
 
 ##### BUILT-IN PKGS #####
-RUN apt update \
-    && apt install -y --no-install-recommends --allow-unauthenticated curl wget apt-utils software-properties-common
+RUN sudo apt update \
+    && sudo apt install -y --no-install-recommends --allow-unauthenticated curl wget apt-utils software-properties-common
 
 ##### ADD CUSTOM KEYS & REPOS #####
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
