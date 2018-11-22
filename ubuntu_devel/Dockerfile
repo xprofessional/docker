@@ -10,7 +10,7 @@
 ################################################################################
 #FROM ubuntu:18.04 as system
 #FROM ubuntu:16.04 as system
-FROM eclipse/che as system
+FROM eclipse/che
 
 ##### BUILT-IN PKGS #####
 RUN apt update \
@@ -56,6 +56,4 @@ RUN apt autoremove -y \
 ################################################################################
 #
 ################################################################################
-FROM system
-
 CMD tail -f /dev/null
