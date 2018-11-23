@@ -33,7 +33,10 @@ RUN sudo apt-get install -y --no-install-recommends --allow-unauthenticated pyth
 RUN sudo pip install --upgrade pip
 RUN sudo pip install --upgrade setuptools \
     && sudo pip install --no-cache-dir virtualenv
-
+RUN sudo /usr/bin/python2.7 -m pip install --upgrade pip
+RUN sudo /usr/bin/python2.7 -m pip install --upgrade setuptools \
+    && sudo /usr/bin/python2.7 -m pip install --no-cache-dir virtualenv
+    
 ARG CHROME_DRIVER_VERSION="latest"
 RUN CD_VERSION=$(if [ ${CHROME_DRIVER_VERSION:-latest} = "latest" ]; then echo $(wget -qO- https://chromedriver.storage.googleapis.com/LATEST_RELEASE); else echo $CHROME_DRIVER_VERSION; fi) \
   && echo "Using chromedriver version: "$CD_VERSION \
