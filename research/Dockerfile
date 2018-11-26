@@ -11,8 +11,8 @@ FROM ubuntu:18.04
 #FROM eclipse/ubuntu_python
 
 ##### BUILT-IN PKGS #####
-RUN sudo apt-get update \
-    &&  sudo apt-get install -y --no-install-recommends --allow-unauthenticated curl wget
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends --allow-unauthenticated curl wget
 
 RUN curl -fsSo /tmp/bootstrapper/bootstrapper https://che.openshift.io/agent-binaries/linux_amd64/bootstrapper/bootstrapper
 
