@@ -11,7 +11,7 @@ FROM ubuntu:18.04
 #FROM eclipse/ubuntu_python
 
 ##### BUILT-IN PKGS #####
-#RUN sudo apt-get update \
-#    &&  sudo apt-get install -y --no-install-recommends --allow-unauthenticated curl wget apt-utils software-properties-common
+RUN sudo apt-get update \
+    &&  sudo apt-get install -y --no-install-recommends --allow-unauthenticated curl wget
 
 CMD tail -f /dev/null
