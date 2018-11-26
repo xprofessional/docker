@@ -12,7 +12,7 @@ FROM ubuntu:18.04
 
 ##### BUILT-IN PKGS #####
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends --allow-unauthenticated curl wget openssl ca-cert
+    && apt-get install -y --no-install-recommends --allow-unauthenticated curl wget openssl ca-certificates
 
 # RUN curl -fsSo /tmp/bootstrapper/bootstrapper https://che.openshift.io/agent-binaries/linux_amd64/bootstrapper/bootstrapper
 
