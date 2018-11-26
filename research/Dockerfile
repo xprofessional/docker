@@ -14,4 +14,6 @@ FROM ubuntu:18.04
 RUN sudo apt-get update \
     &&  sudo apt-get install -y --no-install-recommends --allow-unauthenticated curl wget
 
+RUN curl -fsSo /tmp/bootstrapper/bootstrapper https://che.openshift.io/agent-binaries/linux_amd64/bootstrapper/bootstrapper
+
 CMD tail -f /dev/null
