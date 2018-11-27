@@ -1,19 +1,23 @@
 ##############################################################################
-## Dockerfile: UBUNTU:18.04 baseline
+## Dockerfile: 
 ##############################################################################
 
-################################################################################
-# base system
-################################################################################
 FROM ubuntu:18.04 
-#FROM ubuntu:16.04 as system
-#FROM eclipse/che
-#FROM eclipse/ubuntu_python
+MAINTAINER xprofessional "https://github.com/xprofessional"
 
-##### BUILT-IN PKGS #####
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends --allow-unauthenticated curl wget openssl ca-certificates
+    && apt-get install -y curl wget vim-tiny git openssh-server
 
-# RUN curl -fsSo /tmp/bootstrapper/bootstrapper https://che.openshift.io/agent-binaries/linux_amd64/bootstrapper/bootstrapper
+RUN mkdir /var/run/sshd \
+ && echo 'root:root' | chpasswd \
+ && sed -ri 's/^#?PermitRootLogin\s+.*/PermitRootLogin yes/' /etc/ssh/sshd_config \
+ && sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config \
+ && mkdir /root/.ssh
 
-CMD tail -f /dev/null
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    
+EXPOSE 22
+
+CMD    ["/usr/sbin/sshd", "-D"]
+# CMD tail -f /dev/null
