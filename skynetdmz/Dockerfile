@@ -11,10 +11,12 @@ RUN sudo adduser --disabled-password --quiet xpro \
  && echo "xpro:docker" | chpasswd  \
  && adduser $USER sudo
 
-COPY files/bashrc.root /root/.bashrc
+COPY files/bashrc /root/.bashrc
+COPY files/bashrc /home/xpro/.bashrc
 COPY files/ipinfo.sh /root/
-#COPY files/bashrc.xpro /home/xpro/.bashrc
-#    chown ${USER}:${GROUP} -R /home/xpro/*
+COPY files/skynetdmz.env /root/
+#RUN  chown ${USER}:${GROUP} -R /home/xpro/*
+RUN  chown ${USER}:${GROUP} -R /home/xpro/.*
 
 #USER xpro
 #ENV HOME /home/xpro
