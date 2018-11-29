@@ -9,4 +9,4 @@ echo $(date '+%Y-%m-%d %H:%M:%S') $PWD $(basename $0)
 
 ## Display IP Info incl Geoloc
 curl ipinfo.io/$(curl ipinfo.io/ip 2>/dev/null) 2>/dev/null
-firefox ipinfo.io/$(curl ipinfo.io/ip http://torrentz2.eu 2>/dev/null) 2>/dev/null &
+firefox ipinfo.io/$(curl ipinfo.io/ip 2>/dev/null) https://torrentz2.eu http://localhost:9091 2>/dev/null &
