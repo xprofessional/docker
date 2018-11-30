@@ -1,25 +1,41 @@
 # https://hub.docker.com/r/haugene/transmission-openvpn/
+# https://docs.docker.com/engine/examples/running_ssh_service/
 FROM haugene/transmission-openvpn
 
-RUN apt-get update && apt-get install -y curl firefox vim sudo network-manager-openvpn network-manager 
+RUN apt-get update && apt-get install -y curl firefox vim sudo network-manager-openvpn network-manager openssh-server
 
+RUN mkdir /var/run/sshd && \
+    echo 'root:docker' | chpasswd && \
+    sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+    # SSH login fix. Otherwise user is kicked off after login 
+    sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd && \
+    echo "export VISIBLE=now" >> /etc/profile && \
+    update-rc.d ssh defaults && \
+    systemctl enable ssh.socket && \
+    systemctl enable ssh
+
+ENV NOTVISIBLE "in users profile"
 ENV USER=xpro
 ENV GROUP=xpro
-RUN sudo adduser --disabled-password --quiet xpro \
- && sudo addgroup $USER $GROUP \
- && sudo chown -R $USER:$GROUP /home/$USER \
+RUN adduser --disabled-password --quiet xpro \
+ && addgroup $USER $GROUP \
+ && chown -R $USER:$GROUP /home/$USER \
  && echo "xpro:docker" | chpasswd  \
  && adduser $USER sudo
 
+RUN mkdir /root/.ssh && \
+    mkdir /home/xpro/.ssh
+
+COPY files/docker-entrypoint.sh /
 COPY files/bashrc /root/.bashrc
 COPY files/bashrc /home/xpro/.bashrc
 COPY files/ipinfo.sh /root/
+COPY files/ipinfo.sh /home/xpro
 COPY files/skynetdmz.env /root/
-#RUN  chown ${USER}:${GROUP} -R /home/xpro/*
-RUN  chown ${USER}:${GROUP} -R /home/xpro/.*
+COPY files/skynetdmz.env /home/xpro
+RUN  chown ${USER}:${GROUP} -R /home/xpro/* && \
+     chown ${USER}:${GROUP} -R /home/xpro/.*
 
-#USER xpro
-#ENV HOME /home/xpro
-#WORKDIR /home/xpro
-#CMD tail -f /dev/null
-#CMD /bin/bash
+EXPOSE 22
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
