@@ -33,6 +33,8 @@ COPY files/ipinfo.sh /root/
 COPY files/ipinfo.sh /home/xpro
 COPY files/skynetdmz.env /root/
 COPY files/skynetdmz.env /home/xpro
+COPY files/browse.sh /root/
+COPY files/browse.sh /home/xpro
 RUN  chown ${USER}:${GROUP} -R /home/xpro/* && \
      chown ${USER}:${GROUP} -R /home/xpro/.*
 
