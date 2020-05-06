@@ -1,87 +1,88 @@
-##############################################################################
-## Dockerfile: UBUNTU Base
-##  Python, Pip, Selenium, Google-Chrome, Chromedriver
-## https://hub.docker.com/r/dorowu/ubuntu-desktop-lxde-vnc/~/dockerfile/
-## https://github.com/eclipse/che-dockerfiles/tree/master/recipes
-## https://github.com/eclipse/che-dockerfiles/tree/master/recipes/stack-base/ubuntu
-##############################################################################
+# https://hub.docker.com/r/haugene/transmission-openvpn/
+# https://docs.docker.com/engine/examples/running_ssh_service/
+FROM ubuntu:latest
 
-################################################################################
-# base system
-################################################################################
-#FROM ubuntu:18.04 as system
-#FROM ubuntu:16.04 as system
-#FROM eclipse/che
-FROM eclipse/ubuntu_python
+VOLUME /tsfr
 
-##### BUILT-IN PKGS #####
-RUN sudo apt-get update \
-    &&  sudo apt-get install -y --no-install-recommends --allow-unauthenticated curl wget apt-utils software-properties-common
+# Update, upgrade and install core software
+RUN apt update \
+    && apt -y upgrade \
+    && apt -y install software-properties-common wget git curl jq \
+    && apt update \
+    && apt install -y sudo rar unrar zip unzip ufw iputils-ping openvpn bc tzdata \
+    && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-##### ADD CUSTOM KEYS & REPOS #####
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add - \
-    && sudo rm -f /etc/apt/sources.list.d/google.list \
-    && sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
-    && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    && sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-    && sudo apt-key adv --keyserver pgp.mit.edu --recv-keys 5044912E
-    && sudo sh -c 'echo "deb http://linux.dropbox.com/ubuntu ${DISTRIB_CODENAME} main" >> /etc/apt/sources.list.d/dropbox.list'
-    && curl https://packagecloud.io/gpg.key | sudo apt-key add -
-    && sudo sh -c 'echo "deb https://packagecloud.io/grafana/stable/debian/ stretch main" >> /etc/apt/sources.list.d/grafana.list'
-    && curl -sL https://repos.influxdata.com/influxdb.key | sudo apt-key add -
-    && sudo sh -c 'echo "deb https://repos.influxdata.com/${DISTRIB_ID,,} ${DISTRIB_CODENAME} stable" >> /etc/apt/sources.list.d/influxdb.list'
-    && wget -q -O - wget http://www.webmin.com/jcameron-key.asc | sudo apt-key add -
-    && sudo sh -c 'echo "debh-server http://download.webmin.com/download/repository sarge contrib" >> /etc/apt/sources.list.d/webmin.list'
+# Update Repos
+RUN \
+    # GOOGLE CHROME
+    wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add - \
+    && add-apt-repository "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" \
+    # GRAFANA
+    && curl https://packages.grafana.com/gpg.key | sudo apt-key add - \
+    && add-apt-repository "deb https://packages.grafana.com/oss/deb stable main" \
+    # INFLUX DB
+    && curl -sL https://repos.influxdata.com/influxdb.key | sudo apt-key add - \
+    && add-apt-repository "deb [arch=amd64] https://repos.influxdata.com/ubuntu $(lsb_release -cs) stable" \
+    # WEBMIN
+    && wget -q -O - http://www.webmin.com/jcameron-key.asc | sudo apt-key add - \
+    && add-apt-repository "deb [arch=amd64] http://download.webmin.com/download/repository sarge contrib" \
+    # DOCKER
+    #&& curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - \
+    #&& add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
+    # TRUECRYPT
+    && add-apt-repository ppa:stefansundin/truecrypt \
+    && apt -y update
 
-    && sudo apt-get update
+ # Install Packages
+ RUN apt install -y git manpages p7zip unzip vim \
+    && apt install -y net-tools openssh-server network-manager-openvpn network-manager network-manager-openvpn-gnome nfs-kernel-server \
+    && apt install -y hddtemp iotop lm-sensors nethogs nmap smartmontools \
+    && apt install -y snmpd snmp snmp-mibs-downloader telegraf webmin \
+    && apt install -y google-chrome-stable xvfb xrdp
+    && apt install -y apache2 openssl \
+    && apt install -y python python-pip \
+    && apt install -y influxdb grafana
+ 
+# Cleanup installation
+RUN apt autoremove \
+    && apt autoclean \
+    && apt purge $(dpkg -l linux-{image,headers}-"[0-9]*" | awk '/ii/{print $2}' | grep -ve "$(uname -r | sed -r 's/-[a-z]+//')") \
+    && \rm -fr /var/lib/apt/lists/* /var/cache/apt*
+ 
+ 
+RUN mkdir /var/run/sshd && \
+    echo 'root:docker' | chpasswd && \
+    sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+    # SSH login fix. Otherwise user is kicked off after login 
+    sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd && \
+    echo "export VISIBLE=now" >> /etc/profile && \
+    update-rc.d ssh defaults && \
+    systemctl enable ssh.socket && \
+    systemctl enable ssh
 
-##### INSTALL PACKAGES #####
-RUN sudo apt-get install -y --no-install-recommends --allow-unauthenticated \
-        vim-tiny git p7zip unzip google-chrome-stable firefox \
-        hddtemp iotop lm-sensors manpages nethogs network-manager-openvpn-gnome \
-        nmap openssl openssh-server smartmontools snmpd snmp snmp-mibs-downloader \
-        telegraf webmin xvfb \ #non-display h/w X server
-        apt-transport-https ca-certificates curl software-properties-common \
-        docker-ce apache2 espeak influxdb grafana vim xrdp nautilus-dropbox
+ENV NOTVISIBLE "in users profile"
+ENV USER=xpro
+ENV GROUP=xpro
+RUN adduser --disabled-password --quiet xpro \
+ && addgroup $USER $GROUP \
+ && chown -R $USER:$GROUP /home/$USER \
+ && echo "xpro:docker" | chpasswd  \
+ && adduser $USER sudo
 
-##### INSTALL PYTHON #####
-RUN sudo apt-get install -y --no-install-recommends --allow-unauthenticated python python-pip python-dev build-essential
-RUN sudo pip install --upgrade pip
-RUN sudo pip install --upgrade setuptools \
-    && sudo pip install --no-cache-dir virtualenv
-RUN sudo /usr/bin/python2.7 -m pip install --upgrade pip
-RUN sudo /usr/bin/python2.7 -m pip install --upgrade setuptools \
-    && sudo /usr/bin/python2.7 -m pip install --no-cache-dir virtualenv
-    
-ARG CHROME_DRIVER_VERSION="latest"
-RUN CD_VERSION=$(if [ ${CHROME_DRIVER_VERSION:-latest} = "latest" ]; then echo $(wget -qO- https://chromedriver.storage.googleapis.com/LATEST_RELEASE); else echo $CHROME_DRIVER_VERSION; fi) \
-  && echo "Using chromedriver version: "$CD_VERSION \
-  && wget --no-verbose -O /tmp/chromedriver_linux64.zip https://chromedriver.storage.googleapis.com/$CD_VERSION/chromedriver_linux64.zip \
-  && sudo rm -rf /opt/selenium/chromedriver \
-  && sudo unzip /tmp/chromedriver_linux64.zip -d /opt/selenium \
-  && rm /tmp/chromedriver_linux64.zip \
-  && sudo mv /opt/selenium/chromedriver /opt/selenium/chromedriver-$CD_VERSION \
-  && sudo chmod 755 /opt/selenium/chromedriver-$CD_VERSION \
-  && sudo ln -fs /opt/selenium/chromedriver-$CD_VERSION /usr/bin/chromedriver
+RUN mkdir /root/.ssh && \
+    mkdir /home/xpro/.ssh
 
-### UBUNTU APACHE2 SETUP ###
-RUN sudo apt-get install apache2 \
-    && sudo a2enmod proxy #enable proxy forwarding dirs ../<dir> to <url>
-    && sudo a2enmod proxy_http
-    && sudo a2enmod proxy_balancer
-    && sudo a2enmod lbmethod_byrequests
+COPY files/docker-entrypoint.sh /
+COPY files/bashrc /root/.bashrc
+COPY files/bashrc /home/xpro/.bashrc
+COPY files/ipinfo.sh /root/
+COPY files/ipinfo.sh /home/xpro
+COPY files/skynetweb.env /root/
+COPY files/skynetweb.env /home/xpro
 
-##### UPGRADE #####
-RUN sudo apt-get upgrade -y --no-install-recommends --allow-unauthenticated
+RUN  chown ${USER}:${GROUP} -R /home/xpro/* && \
+     chown ${USER}:${GROUP} -R /home/xpro/.*
 
-##### CLEANUP #####
-RUN sudo apt autoremove -y \
-    && sudo apt autoclean -y \
-    && sudo apt purge $(dpkg -l linux-{image,headers}-"[0-9]*" | awk '/ii/{print $2}' | grep -ve "$(uname -r | sed -r 's/-[a-z]+//')") \
-    && sudo rm -rf /var/lib/apt/lists/* \
-    && sudo rm -rf /var/cache/apt/*
+EXPOSE 22
 
-################################################################################
-#
-################################################################################
-CMD tail -f /dev/null
+ENTRYPOINT ["/docker-entrypoint.sh"]
