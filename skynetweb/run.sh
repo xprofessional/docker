@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMAGE=skynetdmz
+IMAGE=skynetweb
 
 docker stop ${IMAGE}
 docker rm ${IMAGE}
@@ -9,13 +9,13 @@ docker run -ti --name ${IMAGE} --hostname ${IMAGE} \
            --rm --cap-add=NET_ADMIN --device=/dev/net/tun -d \
            --mac-address 00:17:f2:cd:5d:9f \
            -v /tmp/.X11-unix:/tmp/.X11-unix \
-           -v /home/cloud/git/docker/${IMAGE}/data/:/data \
+           -v /home/cloud/git/docker/${IMAGE}/tsfr/:/tsfr \
            -v /etc/localtime:/etc/localtime:ro \
      --env-file /home/cloud/git/docker/${IMAGE}/files/${IMAGE}.env \
            --log-driver json-file \
            --log-opt max-size=10m \
            -p 9091:9091 \
-           -p 8222:22 \
+           -p 8022:22 \
 	   --dns 8.8.8.8 --dns 8.8.4.4 \
 	   ${IMAGE}
 

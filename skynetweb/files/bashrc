@@ -1,0 +1,38 @@
+# .bashrc
+
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+        . /etc/bashrc
+fi
+
+# Uncomment the following line if you don't like systemctl's auto-paging feature:
+# export SYSTEMD_PAGER=
+
+# User specific aliases and functions
+#if [ "$SHLVL" = 1 ]; then
+
+## PROMPT
+## http://bashrcgenerator.com/
+
+# DEFAULT Blank
+export PS1="\u@\h:\w$ "
+
+# BLUE for container
+export PS1="\u\[$(tput sgr0)\]\[\033[48;5;21m\]@\[$(tput bold)\]\h\[$(tput sgr0)\]:\w$ "
+
+if [ "root" == ${USER} ];
+then
+# RED for root
+export PS1="\u\[$(tput sgr0)\]\[\033[48;5;160m\]@\[$(tput bold)\]\h\[$(tput sgr0)\]:\w$ "
+fi
+
+alias ls='ls --color=auto -CF'
+alias sl='ls -F'
+alias l='ls'
+alias la='ls -aF'
+alias ll='ls -alF'
+alias c='clear'
+alias j='jobs'
+alias pd='pushd'
+
